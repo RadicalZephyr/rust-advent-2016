@@ -8,7 +8,7 @@ use std::str::FromStr;
 
 use nom::digit;
 
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Copy,Debug,PartialEq)]
 pub enum Direction {
     L,
     R,
@@ -26,7 +26,7 @@ impl FromStr for Direction {
     }
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Copy,Debug,PartialEq)]
 pub struct Instruction {
     direction: Direction,
     distance: u8,
@@ -68,15 +68,17 @@ named!(pub instruction<Instruction>,
     )
 );
 
+named!(pub delim, eat_separator!(&b", "[..]));
+
 named!(pub instructions<Vec<Instruction> >,
-       many1!(ws!(instruction))
+       separated_nonempty_list!(delim, instruction)
 );
 
 pub fn main() {
     let mut f = File::open("../../data/day_1.txt").expect("File not found");
     let mut s = String::new();
     f.read_to_string(&mut s).expect("Couldn't read file into string");
-
+    let ists = instructions(s.as_bytes());
 }
 
 #[cfg(test)]
@@ -101,6 +103,8 @@ pub mod test {
         let l1 = instruction_from((Direction::L, 1));
         let r4 = instruction_from((Direction::R, 4));
         let is = vec![l1, r4];
-        assert_eq!(instructions(b"L1 R4"), IResult::Done(&b""[..], is))
+        assert_eq!(instructions(b"L1, R4"), IResult::Done(&b""[..], is.clone()));
+        assert_eq!(instructions(b"L1,R4"), IResult::Done(&b""[..], is.clone()));
+        assert_eq!(instructions(b"L1 R4"), IResult::Done(&b""[..], is.clone()));
     }
 }
