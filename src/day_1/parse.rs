@@ -3,11 +3,7 @@ use std::str::FromStr;
 
 use nom::digit;
 
-#[derive(Clone,Copy,Debug,PartialEq)]
-pub enum Direction {
-    L,
-    R,
-}
+use super::{Direction, Instruction};
 
 impl FromStr for Direction {
     type Err = ();
@@ -19,12 +15,6 @@ impl FromStr for Direction {
             _ => Err(()),
         }
     }
-}
-
-#[derive(Clone,Copy,Debug,PartialEq)]
-pub struct Instruction {
-    direction: Direction,
-    distance: u8,
 }
 
 pub fn instruction_from(v: (Direction, u8)) -> Instruction {
@@ -72,6 +62,7 @@ named!(pub instructions<Vec<Instruction> >,
 #[cfg(test)]
 pub mod test {
     use super::*;
+    use super::super::*;
 
     use nom::{ErrorKind, IResult};
 
