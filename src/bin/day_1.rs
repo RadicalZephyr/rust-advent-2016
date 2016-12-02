@@ -83,11 +83,24 @@ pub fn main() {
 pub mod test {
     use super::*;
 
-    use nom::IResult;
+    use nom::{ErrorKind, IResult};
 
     #[test]
     pub fn test_parse_instruction() {
         let i = instruction_from((Direction::L, 1));
         assert_eq!(instruction(b"L1"), IResult::Done(&b""[..], i))
+    }
+
+    #[test]
+    pub fn test_fail_parse_instruction() {
+        assert_eq!(instruction(b"D1"), IResult::Error(ErrorKind::Alt))
+    }
+
+    #[test]
+    pub fn test_parse_many_instructions() {
+        let l1 = instruction_from((Direction::L, 1));
+        let r4 = instruction_from((Direction::R, 4));
+        let is = vec![l1, r4];
+        assert_eq!(instructions(b"L1 R4"), IResult::Done(&b""[..], is))
     }
 }
