@@ -5,11 +5,11 @@ use std::fs::File;
 use std::io::Read;
 use std::str;
 use std::str::FromStr;
-use std::convert::From;
 
 use nom::digit;
 
-enum Direction {
+#[derive(Debug,PartialEq)]
+pub enum Direction {
     L,
     R,
 }
@@ -26,12 +26,13 @@ impl FromStr for Direction {
     }
 }
 
-struct Instruction {
+#[derive(Debug,PartialEq)]
+pub struct Instruction {
     direction: Direction,
     distance: u8,
 }
 
-fn instruction_from(v: (Direction, u8)) -> Instruction {
+pub fn instruction_from(v: (Direction, u8)) -> Instruction {
     let (direction, distance) = v;
 
     Instruction {
@@ -60,14 +61,14 @@ named!(distance<u8>,
     )
 );
 
-named!(instruction<Instruction>,
+named!(pub instruction<Instruction>,
     map!(
         pair!(direction, distance),
         instruction_from
     )
 );
 
-named!(instructions<Vec<Instruction> >,
+named!(pub instructions<Vec<Instruction> >,
        many1!(ws!(instruction))
 );
 
@@ -79,4 +80,14 @@ pub fn main() {
 }
 
 #[cfg(test)]
-pub mod test {}
+pub mod test {
+    use super::*;
+
+    use nom::IResult;
+
+    #[test]
+    pub fn test_parse_instruction() {
+        let i = instruction_from((Direction::L, 1));
+        assert_eq!(instruction(b"L1"), IResult::Done(&b""[..], i))
+    }
+}
