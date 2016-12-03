@@ -163,7 +163,7 @@ impl TrackingLocationReduction {
         let mut hq_location = None;
         for location in correct_heading.locations_walked_through_for(&instruction) {
             hq_location = match hq_location {
-                Some(l) => Some(l),
+                hq @ Some(_) => hq,
                 None => {
                     if self.visited.contains(&location) {
                         Some(location)
