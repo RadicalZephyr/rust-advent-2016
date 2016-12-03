@@ -55,6 +55,7 @@ fn travel_iter(heading: Heading, distance: u8) -> Vec<(i64, i64)> {
     use self::Heading::*;
     let distance = distance as i64;
     let distance_range = (0..(distance)).into_iter();
+    // println!(".{}.", distance);
     match heading {
         North => distance_range.map(|i| (0, i + 1)).collect(),
         East => distance_range.map(|i| (i + 1, 0)).collect(),
@@ -112,9 +113,11 @@ impl Location {
     }
 
     pub fn locations_walked_through_for(&self, instruction: &Instruction) -> Vec<Self> {
+        // println!("");
         travel_iter(self.heading, instruction.distance)
             .into_iter()
             .map(|(dx, dy)| {
+                // println!("({},{})", dx, dy);
                 Location {
                     x: self.x + dx,
                     y: self.y + dy,
@@ -162,6 +165,7 @@ impl TrackingLocationReduction {
         let next_location = correct_heading.walk_for(&instruction);
         let mut hq_location = self.hq_location;
         for location in correct_heading.locations_walked_through_for(&instruction) {
+            // println!("({},{})", location.x, location.y);
             hq_location = match hq_location {
                 hq @ Some(_) => hq,
                 None => {
@@ -174,6 +178,14 @@ impl TrackingLocationReduction {
             };
             self.visited.insert(location);
         }
+        // print!("#{}", "{");
+        // let mut sep = "";
+        // for l in self.visited.iter() {
+        //     print!("{}({},{})", sep, l.x, l.y);
+        //     sep = ", ";
+        // }
+        // print!("{}", "}");
+        // println!("");
 
         (next_location, hq_location)
     }

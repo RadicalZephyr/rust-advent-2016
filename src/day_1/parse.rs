@@ -60,7 +60,7 @@ named!(pub instructions<Vec<Instruction> >,
 );
 
 #[cfg(test)]
-pub mod test {
+mod test {
     use super::*;
     use super::super::*;
 
