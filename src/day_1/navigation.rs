@@ -160,7 +160,7 @@ impl TrackingLocationReduction {
     pub fn travel_along_path(&mut self, instruction: Instruction) -> (Location, Option<Location>) {
         let correct_heading = self.current.turn_for(&instruction);
         let next_location = correct_heading.walk_for(&instruction);
-        let mut hq_location = None;
+        let mut hq_location = self.hq_location;
         for location in correct_heading.locations_walked_through_for(&instruction) {
             hq_location = match hq_location {
                 hq @ Some(_) => hq,
