@@ -12,3 +12,12 @@ pub struct Instruction {
     direction: Direction,
     distance: u8,
 }
+
+impl Instruction {
+    pub fn new(direction: Direction, distance: u8) -> Self {
+        Instruction {
+            direction: direction,
+            distance: distance,
+        }
+    }
+}

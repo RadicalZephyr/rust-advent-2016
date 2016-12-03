@@ -9,5 +9,5 @@ pub fn main() {
     let mut f = File::open("../../data/day_1.txt").expect("File not found");
     let mut s = String::new();
     f.read_to_string(&mut s).expect("Couldn't read file into string");
-    let ists = parse::instructions(s.as_bytes());
+    let _ists = parse::instructions(s.as_bytes());
 }
