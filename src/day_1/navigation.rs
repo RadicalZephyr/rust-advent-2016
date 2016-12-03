@@ -35,8 +35,8 @@ impl Heading {
         )
     }
 
-    pub fn turn(h: Heading, d: Direction) -> Self {
-        *Self::mappings().get(&h).unwrap().get(&d).unwrap()
+    pub fn turn(&self, d: Direction) -> Self {
+        *Self::mappings().get(self).unwrap().get(&d).unwrap()
     }
 }
 
@@ -75,7 +75,7 @@ impl Location {
         Location {
             x: self.x,
             y: self.y,
-            heading: Heading::turn(self.heading, instruction.direction),
+            heading: self.heading.turn(instruction.direction),
         }
     }
 
