@@ -70,10 +70,14 @@ impl Location {
         let new_heading = Heading::turn(self.heading, i.direction);
         let (dx, dy) = travel(new_heading, i.distance);
         Location {
-            x: 0 + dx,
-            y: 0 + dy,
+            x: self.x + dx,
+            y: self.y + dy,
             heading: new_heading,
         }
+    }
+
+    pub fn follow_all_instructions(self, instructions: Vec<Instruction>) -> Self {
+        instructions.into_iter().fold(self, Self::follow_instruction)
     }
 }
 
@@ -93,5 +97,20 @@ mod test {
             heading: Heading::West,
         };
         assert_eq!(actual_location, expected_location);
+    }
+
+    #[test]
+    pub fn test_follow_many_instructions() {
+        let l = Location::new();
+        let i1 = Instruction::new(Direction::Left, 1);
+        let i2 = Instruction::new(Direction::Right, 1);
+        let is = vec![i1, i2];
+        let final_location = l.follow_all_instructions(is);
+        let expected_location = Location {
+            x: -1,
+            y: 1,
+            heading: Heading::North,
+        };
+        assert_eq!(final_location, expected_location);
     }
 }
