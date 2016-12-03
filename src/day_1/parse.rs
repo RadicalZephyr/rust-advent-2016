@@ -9,9 +9,10 @@ impl FromStr for Direction {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        use super::Direction::*;
         match s {
-            "L" => Ok(Direction::Left),
-            "R" => Ok(Direction::Right),
+            "L" => Ok(Left),
+            "R" => Ok(Right),
             _ => Err(()),
         }
     }
@@ -29,7 +30,7 @@ pub fn instruction_from(v: (Direction, u8)) -> Instruction {
 named!(direction<Direction>,
     map_res!(
         map_res!(
-          alt!(tag!("L") | tag!("R")) ,
+          alt!(tag!("L") | tag!("R")),
           str::from_utf8
         ),
         FromStr::from_str
