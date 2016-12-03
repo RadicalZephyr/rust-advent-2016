@@ -148,7 +148,7 @@ struct TrackingLocationReduction {
 impl TrackingLocationReduction {
     pub fn new(location: Location) -> Self {
         let mut visited = HashSet::new();
-        visited.insert(location.clone());
+        visited.insert(location);
         TrackingLocationReduction {
             hq_location: None,
             visited: visited,
@@ -165,13 +165,13 @@ impl TrackingLocationReduction {
                 Some(l) => Some(l),
                 None => {
                     if self.visited.contains(&location) {
-                        Some(location.clone())
+                        Some(location)
                     } else {
                         None
                     }
                 }
             };
-            self.visited.insert(location.clone());
+            self.visited.insert(location);
         }
 
         (next_location, hq_location)
