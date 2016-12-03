@@ -86,26 +86,29 @@ impl TrackingLocationReduction {
         }
     }
 
-    pub fn travel_along_path(&mut self, path: Vec<(i64, i64)>) -> (Location, Option<Location>) {
-        let next_location = self.current;//.with_offset(path[0]);
-        let hq_location = match self.hq_location {
-            Some(l) => Some(l),
-            None => {
-                if self.visited.contains(&next_location) {
-                    Some(next_location.clone())
-                } else {
-                    None
+    pub fn travel_along_path(&mut self, instruction: Instruction) -> (Location, Option<Location>) {
+        let correct_heading = self.current.turn_for(&instruction);
+        let next_location = correct_heading.walk_for(&instruction);
+        let mut hq_location = None;
+        for location in correct_heading.locations_walked_through_for(&instruction) {
+            hq_location = match hq_location {
+                Some(l) => Some(l),
+                None => {
+                    if self.visited.contains(&location) {
+                        Some(location.clone())
+                    } else {
+                        None
+                    }
                 }
-            }
-        };
-        self.visited.insert(next_location.clone());
+            };
+            self.visited.insert(location.clone());
+        }
 
         (next_location, hq_location)
     }
 
-    pub fn follow_instruction(self, i: Instruction) -> Self {
-        let start = self.current.clone();
-        let (next_location, hq_location) = (self.current, None);//self.travel_along_path();
+    pub fn follow_instruction(mut self, instruction: Instruction) -> Self {
+        let (next_location, hq_location) = self.travel_along_path(instruction);
 
         TrackingLocationReduction {
             hq_location: hq_location,
@@ -139,6 +142,19 @@ impl Location {
             y: self.y + dy,
             heading: self.heading,
         }
+    }
+
+    pub fn locations_walked_through_for(&self, instruction: &Instruction) -> Vec<Self> {
+        travel_iter(self.heading, instruction.distance)
+            .into_iter()
+            .map(|(dx, dy)| {
+                Location {
+                    x: self.x + dx,
+                    y: self.y + dy,
+                    heading: self.heading,
+                }
+            })
+            .collect()
     }
 
     pub fn follow_instruction(self, i: Instruction) -> Self {
