@@ -54,11 +54,12 @@ fn travel(heading: Heading, distance: u8) -> (i64, i64) {
 fn travel_iter(heading: Heading, distance: u8) -> Vec<(i64, i64)> {
     use self::Heading::*;
     let distance = distance as i64;
+    let distance_range = (0..(distance)).into_iter();
     match heading {
-        North => (0..(distance + 1)).into_iter().map(|i| (0, i)).collect(),
-        East => (0..(distance + 1)).into_iter().map(|i| (i, 0)).collect(),
-        South => (0..(-(distance + 1))).into_iter().map(|i| (0, i)).collect(),
-        West => (0..(-(distance + 1))).into_iter().map(|i| (i, 0)).collect(),
+        North => distance_range.map(|i| (0, i + 1)).collect(),
+        East => distance_range.map(|i| (i + 1, 0)).collect(),
+        South => distance_range.map(|i| (0, 0 - (i + 1))).collect(),
+        West => distance_range.map(|i| (0 - (i + 1), 0)).collect(),
     }
 }
 
