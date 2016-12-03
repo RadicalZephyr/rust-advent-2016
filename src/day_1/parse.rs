@@ -10,8 +10,8 @@ impl FromStr for Direction {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "L" => Ok(Direction::L),
-            "R" => Ok(Direction::R),
+            "L" => Ok(Direction::Left),
+            "R" => Ok(Direction::Right),
             _ => Err(()),
         }
     }
@@ -68,7 +68,7 @@ pub mod test {
 
     #[test]
     pub fn test_parse_instruction() {
-        let i = instruction_from((Direction::L, 1));
+        let i = instruction_from((Direction::Left, 1));
         assert_eq!(instruction(b"L1"), IResult::Done(&b""[..], i))
     }
 
@@ -79,8 +79,8 @@ pub mod test {
 
     #[test]
     pub fn test_parse_many_instructions() {
-        let l1 = instruction_from((Direction::L, 1));
-        let r4 = instruction_from((Direction::R, 4));
+        let l1 = instruction_from((Direction::Left, 1));
+        let r4 = instruction_from((Direction::Right, 4));
         let is = vec![l1, r4];
         assert_eq!(instructions(b"L1, R4"), IResult::Done(&b""[..], is.clone()));
         assert_eq!(instructions(b"L1,R4"), IResult::Done(&b""[..], is.clone()));
