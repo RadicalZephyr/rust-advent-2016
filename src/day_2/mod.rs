@@ -1,5 +1,6 @@
 pub mod parse;
 
+#[derive(Copy,Clone,Debug,Eq,Hash,PartialEq)]
 pub enum Direction {
     Up,
     Down,
