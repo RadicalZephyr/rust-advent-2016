@@ -1,5 +1,5 @@
 use super::{Direction, Instruction};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Clone,Copy,Debug,Eq,Hash,PartialEq)]
 pub enum Heading {
@@ -39,7 +39,7 @@ impl Heading {
     }
 }
 
-#[derive(Clone,Copy,Debug,PartialEq)]
+#[derive(Clone,Copy,Debug,Eq,Hash,PartialEq)]
 pub struct Location {
     x: i64,
     y: i64,
@@ -54,6 +54,48 @@ pub fn travel(heading: Heading, distance: u8) -> (i64, i64) {
         East => (distance, 0),
         South => (0, -distance),
         West => (-distance, 0),
+    }
+}
+
+#[derive(Debug)]
+struct TrackingLocationReduction {
+    hq_location: Option<Location>,
+    visited: HashSet<Location>,
+    current: Location,
+}
+
+impl TrackingLocationReduction {
+    pub fn new(location: Location) -> Self {
+        let mut visited = HashSet::new();
+        visited.insert(location.clone());
+        TrackingLocationReduction {
+            hq_location: None,
+            visited: visited,
+            current: location,
+        }
+    }
+
+    pub fn follow_instruction(self, i: Instruction) -> Self {
+        let mut visited = self.visited;
+        let start = self.current.clone();
+        let next_location = self.current.follow_instruction(i);
+        let hq_location = match self.hq_location {
+            Some(l) => Some(l),
+            None => {
+                if visited.contains(&next_location) {
+                    Some(next_location.clone())
+                } else {
+                    None
+                }
+            }
+        };
+        visited.insert(next_location.clone());
+
+        TrackingLocationReduction {
+            hq_location: hq_location,
+            visited: visited,
+            current: next_location,
+        }
     }
 }
 
@@ -79,7 +121,17 @@ impl Location {
     pub fn follow_all_instructions(self, instructions: Vec<Instruction>) -> Self {
         instructions.into_iter().fold(self, Self::follow_instruction)
     }
+
+    pub fn first_repeated_location(self, instructions: Vec<Instruction>) -> Self {
+        let result = instructions.into_iter().fold(TrackingLocationReduction::new(self),
+                                                   TrackingLocationReduction::follow_instruction);
+        match result.hq_location {
+            Some(l) => l,
+            None => panic!("No already visited location found."),
+        }
+    }
 }
+
 
 #[cfg(test)]
 mod test {
