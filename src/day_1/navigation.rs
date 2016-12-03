@@ -57,6 +57,17 @@ pub fn travel(heading: Heading, distance: u8) -> (i64, i64) {
     }
 }
 
+pub fn travel_iter(heading: Heading, distance: u8) -> Vec<(i64, i64)> {
+    use self::Heading::*;
+    let distance = distance as i64;
+    match heading {
+        North => (0..distance).into_iter().map(|i| (0, i)).collect(),
+        East => (0..distance).into_iter().map(|i| (i, 0)).collect(),
+        South => (0..(-distance)).into_iter().map(|i| (0, i)).collect(),
+        West => (0..(-distance)).into_iter().map(|i| (i, 0)).collect(),
+    }
+}
+
 #[derive(Debug)]
 struct TrackingLocationReduction {
     hq_location: Option<Location>,
@@ -77,7 +88,7 @@ impl TrackingLocationReduction {
 
     pub fn follow_instruction(self, i: Instruction) -> Self {
         let mut visited = self.visited;
-        let start = self.current.clone();
+        let _start = self.current.clone();
         let next_location = self.current.follow_instruction(i);
         let hq_location = match self.hq_location {
             Some(l) => Some(l),
@@ -108,14 +119,26 @@ impl Location {
         }
     }
 
-    pub fn follow_instruction(self, i: Instruction) -> Self {
-        let new_heading = Heading::turn(self.heading, i.direction);
-        let (dx, dy) = travel(new_heading, i.distance);
+    pub fn with_offset(&self, delta: (i64, i64)) -> Self {
+        let (dx, dy) = delta;
         Location {
             x: self.x + dx,
             y: self.y + dy,
-            heading: new_heading,
+            heading: self.heading,
         }
+    }
+
+    pub fn with_heading(&self, heading: Heading) -> Self {
+        Location {
+            x: self.x,
+            y: self.y,
+            heading: heading,
+        }
+    }
+
+    pub fn follow_instruction(self, i: Instruction) -> Self {
+        let new_heading = Heading::turn(self.heading, i.direction);
+        self.with_offset(travel(new_heading, i.distance)).with_heading(new_heading)
     }
 
     pub fn follow_all_instructions(self, instructions: Vec<Instruction>) -> Self {
