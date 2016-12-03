@@ -40,6 +40,28 @@ impl Heading {
     }
 }
 
+fn travel(heading: Heading, distance: u8) -> (i64, i64) {
+    use self::Heading::*;
+    let distance = distance as i64;
+    match heading {
+        North => (0, distance),
+        East => (distance, 0),
+        South => (0, -distance),
+        West => (-distance, 0),
+    }
+}
+
+fn travel_iter(heading: Heading, distance: u8) -> Vec<(i64, i64)> {
+    use self::Heading::*;
+    let distance = distance as i64;
+    match heading {
+        North => (0..distance).into_iter().map(|i| (0, i)).collect(),
+        East => (0..distance).into_iter().map(|i| (i, 0)).collect(),
+        South => (0..(-distance)).into_iter().map(|i| (0, i)).collect(),
+        West => (0..(-distance)).into_iter().map(|i| (i, 0)).collect(),
+    }
+}
+
 #[derive(Clone,Copy,Debug)]
 pub struct Location {
     x: i64,
@@ -113,28 +135,6 @@ impl Location {
         let result = instructions.into_iter().fold(TrackingLocationReduction::new(self),
                                                    TrackingLocationReduction::follow_instruction);
         result.hq_location
-    }
-}
-
-pub fn travel(heading: Heading, distance: u8) -> (i64, i64) {
-    use self::Heading::*;
-    let distance = distance as i64;
-    match heading {
-        North => (0, distance),
-        East => (distance, 0),
-        South => (0, -distance),
-        West => (-distance, 0),
-    }
-}
-
-pub fn travel_iter(heading: Heading, distance: u8) -> Vec<(i64, i64)> {
-    use self::Heading::*;
-    let distance = distance as i64;
-    match heading {
-        North => (0..distance).into_iter().map(|i| (0, i)).collect(),
-        East => (0..distance).into_iter().map(|i| (i, 0)).collect(),
-        South => (0..(-distance)).into_iter().map(|i| (0, i)).collect(),
-        West => (0..(-distance)).into_iter().map(|i| (i, 0)).collect(),
     }
 }
 
