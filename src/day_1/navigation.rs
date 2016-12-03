@@ -165,13 +165,10 @@ impl Location {
         instructions.into_iter().fold(self, Self::follow_instruction)
     }
 
-    pub fn first_repeated_location(self, instructions: Vec<Instruction>) -> Self {
+    pub fn first_repeated_location(self, instructions: Vec<Instruction>) -> Option<Self> {
         let result = instructions.into_iter().fold(TrackingLocationReduction::new(self),
                                                    TrackingLocationReduction::follow_instruction);
-        match result.hq_location {
-            Some(l) => l,
-            None => panic!("No already visited location found."),
-        }
+        result.hq_location
     }
 }
 
@@ -197,15 +194,34 @@ mod test {
     #[test]
     pub fn test_follow_many_instructions() {
         let l = Location::new();
-        let i1 = Instruction::new(Direction::Left, 1);
-        let i2 = Instruction::new(Direction::Right, 1);
-        let is = vec![i1, i2];
-        let final_location = l.follow_all_instructions(is);
+        let instructions = vec![
+            Instruction::new(Direction::Left, 1),
+            Instruction::new(Direction::Right, 1)
+        ];
+        let final_location = l.follow_all_instructions(instructions);
         let expected_location = Location {
             x: -1,
             y: 1,
             heading: Heading::North,
         };
         assert_eq!(final_location, expected_location);
+    }
+
+    #[test]
+    pub fn test_follow_visiting_all() {
+        let l = Location::new();
+        let instructions = vec![
+            Instruction::new(Direction::Right, 8),
+            Instruction::new(Direction::Right, 4),
+            Instruction::new(Direction::Right, 4),
+            Instruction::new(Direction::Right, 8),
+        ];
+        let hq_location = l.first_repeated_location(instructions);
+        let expected_location = Location {
+            x: 4,
+            y: 0,
+            heading: Heading::North,
+        };
+        assert_eq!(hq_location, Some(expected_location));
     }
 }
