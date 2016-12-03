@@ -86,25 +86,30 @@ impl TrackingLocationReduction {
         }
     }
 
-    pub fn follow_instruction(self, i: Instruction) -> Self {
-        let mut visited = self.visited;
-        let _start = self.current.clone();
-        let next_location = self.current.follow_instruction(i);
+    pub fn travel_along_path(&mut self, path: Vec<(i64, i64)>) -> (Location, Option<Location>) {
+        let next_location = self.current;//.with_offset(path[0]);
         let hq_location = match self.hq_location {
             Some(l) => Some(l),
             None => {
-                if visited.contains(&next_location) {
+                if self.visited.contains(&next_location) {
                     Some(next_location.clone())
                 } else {
                     None
                 }
             }
         };
-        visited.insert(next_location.clone());
+        self.visited.insert(next_location.clone());
+
+        (next_location, hq_location)
+    }
+
+    pub fn follow_instruction(self, i: Instruction) -> Self {
+        let start = self.current.clone();
+        let (next_location, hq_location) = (self.current, None);//self.travel_along_path();
 
         TrackingLocationReduction {
             hq_location: hq_location,
-            visited: visited,
+            visited: self.visited,
             current: next_location,
         }
     }
@@ -119,8 +124,16 @@ impl Location {
         }
     }
 
-    pub fn with_offset(&self, delta: (i64, i64)) -> Self {
-        let (dx, dy) = delta;
+    pub fn turn_for(&self, instruction: &Instruction) -> Self {
+        Location {
+            x: self.x,
+            y: self.y,
+            heading: Heading::turn(self.heading, instruction.direction),
+        }
+    }
+
+    pub fn walk_for(&self, instruction: &Instruction) -> Self {
+        let (dx, dy) = travel(self.heading, instruction.distance);
         Location {
             x: self.x + dx,
             y: self.y + dy,
@@ -128,17 +141,8 @@ impl Location {
         }
     }
 
-    pub fn with_heading(&self, heading: Heading) -> Self {
-        Location {
-            x: self.x,
-            y: self.y,
-            heading: heading,
-        }
-    }
-
     pub fn follow_instruction(self, i: Instruction) -> Self {
-        let new_heading = Heading::turn(self.heading, i.direction);
-        self.with_offset(travel(new_heading, i.distance)).with_heading(new_heading)
+        self.turn_for(&i).walk_for(&i)
     }
 
     pub fn follow_all_instructions(self, instructions: Vec<Instruction>) -> Self {
