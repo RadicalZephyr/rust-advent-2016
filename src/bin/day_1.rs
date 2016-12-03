@@ -6,6 +6,7 @@ use std::io::Read;
 
 use nom::IResult;
 
+use advent_2016::day_1::Instruction;
 use advent_2016::day_1::parse;
 use advent_2016::day_1::navigation;
 
@@ -15,11 +16,20 @@ pub fn main() {
     f.read_to_string(&mut s).expect("Couldn't read file into string");
     match parse::instructions(s.as_bytes()) {
         IResult::Done(_, instructions) => {
-            // let hq_location = navigation::Location::new().follow_all_instructions(instructions);
-            let hq_location = navigation::Location::new().first_repeated_location(instructions);
-            println!("Final location is {:?}", hq_location)
+            part_1(instructions.clone());
+            part_2(instructions.clone());
         }
         IResult::Error(error) => panic!("Error: {:?}", error),
         IResult::Incomplete(needed) => panic!("Incomplete input: {:?}", needed),
     }
+}
+
+fn part_1(instructions: Vec<Instruction>) {
+    let hq_location = navigation::Location::new().follow_all_instructions(instructions);
+    println!("Final location is {:?}", hq_location)
+}
+
+fn part_2(instructions: Vec<Instruction>) {
+    let hq_location = navigation::Location::new().first_repeated_location(instructions);
+    println!("Final location is {:?}", hq_location)
 }
