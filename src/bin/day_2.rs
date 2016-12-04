@@ -6,6 +6,7 @@ use std::io::Read;
 
 use nom::IResult;
 
+use advent_2016::day_2;
 use advent_2016::day_2::{Direction, Keypad};
 use advent_2016::day_2::parse;
 
@@ -21,7 +22,7 @@ pub fn main() {
 }
 
 fn part_1(instructions_list: Vec<Vec<Direction>>) {
-    let mut kp = Keypad::new();
+    let mut kp = Keypad::new(day_2::simple_lookup());
     for instructions in instructions_list {
         kp.next_key(instructions);
         print!("{}", kp.num);

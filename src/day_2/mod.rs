@@ -1,4 +1,18 @@
+use std::collections::HashMap;
+
 pub mod parse;
+
+macro_rules! map(
+    { $($key:expr => $value:expr),+ } => {
+        {
+            let mut m = ::std::collections::HashMap::new();
+            $(
+                m.insert($key, $value);
+            )+
+                m
+        }
+    };
+);
 
 #[derive(Copy,Clone,Debug,Eq,Hash,PartialEq)]
 pub enum Direction {
@@ -10,11 +24,15 @@ pub enum Direction {
 
 pub struct Keypad {
     pub num: u8,
+    lookup: HashMap<u8, HashMap<Direction, u8>>,
 }
 
 impl Keypad {
-    pub fn new() -> Self {
-        Keypad { num: 5 }
+    pub fn new(lookup: HashMap<u8, HashMap<Direction, u8>>) -> Self {
+        Keypad {
+            num: 5,
+            lookup: lookup,
+        }
     }
 
     pub fn next_key(&mut self, directions: Vec<Direction>) {
@@ -24,46 +42,33 @@ impl Keypad {
     }
 
     pub fn do_move(&mut self, direction: Direction) {
-        use self::Direction::*;
-        match direction {
-            Up => self.up(),
-            Down => self.down(),
-            Left => self.left(),
-            Right => self.right(),
-        }
+        self.num = self.lookup_move(direction);
     }
 
-    pub fn up(&mut self) {
-        self.num = match self.num {
-            n @ 1...3 => n,
-            n @ 4...9 => n - 3,
-            n @ _ => n,
-        }
+    pub fn lookup_move(&self, direction: Direction) -> u8 {
+        *self.lookup
+            .get(&self.num)
+            .map(|direction_lookup| {
+                direction_lookup.get(&direction)
+                    .unwrap_or(&self.num)
+            })
+            .unwrap_or(&self.num)
     }
+}
 
-    pub fn down(&mut self) {
-        self.num = match self.num {
-            n @ 1...6 => n + 3,
-            n @ 7...9 => n,
-            n @ _ => n,
-        }
-    }
-
-    pub fn left(&mut self) {
-        self.num = match self.num {
-            1 | 4 | 7 => self.num,
-            2 | 3 | 5 | 6 | 8 | 9 => self.num - 1,
-            n @ _ => n,
-        }
-    }
-
-    pub fn right(&mut self) {
-        self.num = match self.num {
-            3 | 6 | 9 => self.num,
-            1 | 2 | 4 | 5 | 7 | 8 => self.num + 1,
-            n @ _ => n,
-        }
-    }
+pub fn simple_lookup() -> HashMap<u8, HashMap<Direction, u8>> {
+    use self::Direction::*;
+    map!(
+        1 => map!(Right => 2, Down => 4),
+        2 => map!(Left => 1, Right => 3, Down => 5),
+        3 => map!(Left => 2, Down => 6),
+        4 => map!(Right => 5, Up => 1, Down => 7),
+        5 => map!(Left => 4, Right => 6, Up => 2, Down => 8),
+        6 => map!(Left => 5, Up => 3, Down => 9),
+        7 => map!(Right => 8, Up => 4),
+        8 => map!(Left => 7, Right => 9, Up => 5),
+        9 => map!(Left => 8, Up => 6)
+    )
 }
 
 #[cfg(test)]
@@ -74,76 +79,17 @@ mod tests {
     fn test_next_key() {
         use super::Direction::*;
         let moves = vec![Up, Left, Left];
-        let mut kp = Keypad::new();
+        let mut kp = Keypad::new(simple_lookup());
         kp.next_key(moves);
         assert_eq!(1, kp.num);
     }
 
     #[test]
     fn test_do_move() {
-        let mut kp = Keypad::new();
+        let mut kp = Keypad::new(simple_lookup());
         kp.do_move(Direction::Up);
         assert_eq!(2, kp.num);
         kp.do_move(Direction::Down);
         assert_eq!(5, kp.num);
-    }
-
-    #[test]
-    fn test_up() {
-        let mut kp = Keypad { num: 9 };
-        kp.up();
-        assert_eq!(6, kp.num);
-        let mut kp = Keypad { num: 8 };
-        kp.up();
-        assert_eq!(5, kp.num);
-        kp.up();
-        assert_eq!(2, kp.num);
-        kp.up();
-        assert_eq!(2, kp.num);
-    }
-
-    #[test]
-    fn test_down() {
-        let mut kp = Keypad { num: 4 };
-        kp.down();
-        assert_eq!(7, kp.num);
-        let mut kp = Keypad { num: 3 };
-        kp.down();
-        assert_eq!(6, kp.num);
-        kp.down();
-        assert_eq!(9, kp.num);
-        kp.down();
-        assert_eq!(9, kp.num);
-    }
-
-    #[test]
-    fn test_left() {
-        let mut kp = Keypad { num: 2 };
-        kp.left();
-        assert_eq!(1, kp.num);
-        let mut kp = Keypad { num: 5 };
-        kp.left();
-        assert_eq!(4, kp.num);
-        let mut kp = Keypad { num: 9 };
-        kp.left();
-        assert_eq!(8, kp.num);
-        kp.left();
-        assert_eq!(7, kp.num);
-        kp.left();
-        assert_eq!(7, kp.num);
-    }
-
-    #[test]
-    fn test_right() {
-        let mut kp = Keypad { num: 2 };
-        kp.right();
-        assert_eq!(3, kp.num);
-        let mut kp = Keypad { num: 4 };
-        kp.right();
-        assert_eq!(5, kp.num);
-        kp.right();
-        assert_eq!(6, kp.num);
-        kp.right();
-        assert_eq!(6, kp.num);
     }
 }
