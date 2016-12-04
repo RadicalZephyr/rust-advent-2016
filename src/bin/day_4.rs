@@ -1,5 +1,6 @@
-extern crate nom;
+#[macro_use]
 extern crate advent_2016;
+extern crate nom;
 
 use std::fs::File;
 use std::io::Read;
@@ -13,13 +14,11 @@ pub fn main() {
     let mut f = File::open("../../data/day_4.txt").expect("File not found");
     let mut s = String::new();
     f.read_to_string(&mut s).expect("Couldn't read file into string");
-    match parse::rooms(s.as_bytes()) {
-        IResult::Done(_, rooms) => {
+    match_parse!{
+        rooms = parse::rooms(s.as_bytes()) => {
             part_1(&rooms);
             part_2(&rooms)
         }
-        IResult::Error(error) => panic!("Error: {:?}", error),
-        IResult::Incomplete(needed) => panic!("Incomplete input: {:?}", needed),
     }
 }
 
