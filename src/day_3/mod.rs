@@ -15,4 +15,8 @@ impl Triangle {
             c: sides.2,
         }
     }
+
+    pub fn valid(&self) -> bool {
+        (self.a + self.b > self.c) && (self.b + self.c > self.a) && (self.c + self.a > self.b)
+    }
 }
