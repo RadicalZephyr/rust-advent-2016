@@ -1,6 +1,7 @@
-use super::{Direction, Instruction};
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
+
+use super::{Direction, Instruction};
 
 #[derive(Clone,Copy,Debug,Eq,Hash,PartialEq)]
 pub enum Heading {
@@ -10,28 +11,16 @@ pub enum Heading {
     West,
 }
 
-macro_rules! map(
-    { $($key:expr => $value:expr),+ } => {
-{
-    let mut m = ::std::collections::HashMap::new();
-    $(
-        m.insert($key, $value);
-    )+
-        m
-}
-     };
-);
-
 impl Heading {
     pub fn mappings() -> HashMap<Heading, HashMap<Direction, Heading>> {
         use self::Heading::*;
         use super::Direction::*;
 
-        map!(
-            North => map!(Left => West, Right => East),
-            East => map!(Left => North, Right => South),
-            South => map!(Left => East, Right => West),
-            West => map!(Left => South, Right => North)
+        hashmap!(
+            North => hashmap!(Left => West, Right => East),
+            East => hashmap!(Left => North, Right => South),
+            South => hashmap!(Left => East, Right => West),
+            West => hashmap!(Left => South, Right => North)
         )
     }
 
@@ -214,10 +203,8 @@ mod test {
     #[test]
     pub fn test_follow_many_instructions() {
         let l = Location::new();
-        let instructions = vec![
-            Instruction::new(Direction::Left, 1),
-            Instruction::new(Direction::Right, 1)
-        ];
+        let instructions = vec![Instruction::new(Direction::Left, 1),
+                                Instruction::new(Direction::Right, 1)];
         let final_location = l.follow_all_instructions(&instructions);
         let expected_location = Location {
             x: -1,
