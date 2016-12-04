@@ -127,17 +127,17 @@ impl Location {
             .collect()
     }
 
-    pub fn follow_instruction(self, i: Instruction) -> Self {
+    pub fn follow_instruction(self, i: &Instruction) -> Self {
         self.turn_for(&i).walk_for(&i)
     }
 
-    pub fn follow_all_instructions(self, instructions: Vec<Instruction>) -> Self {
-        instructions.into_iter().fold(self, Self::follow_instruction)
+    pub fn follow_all_instructions(self, instructions: &Vec<Instruction>) -> Self {
+        instructions.iter().fold(self, Self::follow_instruction)
     }
 
-    pub fn first_repeated_location(self, instructions: Vec<Instruction>) -> Option<Self> {
-        let result = instructions.into_iter().fold(TrackingLocationReduction::new(self),
-                                                   TrackingLocationReduction::follow_instruction);
+    pub fn first_repeated_location(self, instructions: &Vec<Instruction>) -> Option<Self> {
+        let result = instructions.iter().fold(TrackingLocationReduction::new(self),
+                                              TrackingLocationReduction::follow_instruction);
         result.hq_location
     }
 }
@@ -160,7 +160,7 @@ impl TrackingLocationReduction {
         }
     }
 
-    pub fn travel_along_path(&mut self, instruction: Instruction) -> (Location, Option<Location>) {
+    pub fn travel_along_path(&mut self, instruction: &Instruction) -> (Location, Option<Location>) {
         let correct_heading = self.current.turn_for(&instruction);
         let next_location = correct_heading.walk_for(&instruction);
         let mut hq_location = self.hq_location;
@@ -190,7 +190,7 @@ impl TrackingLocationReduction {
         (next_location, hq_location)
     }
 
-    pub fn follow_instruction(mut self, instruction: Instruction) -> Self {
+    pub fn follow_instruction(mut self, instruction: &Instruction) -> Self {
         let (next_location, hq_location) = self.travel_along_path(instruction);
 
         TrackingLocationReduction {
@@ -211,7 +211,7 @@ mod test {
     pub fn test_follow_instruction() {
         let l = Location::new();
         let i = Instruction::new(Direction::Left, 1);
-        let actual_location = l.follow_instruction(i);
+        let actual_location = l.follow_instruction(&i);
         let expected_location = Location {
             x: -1,
             y: 0,
@@ -227,7 +227,7 @@ mod test {
             Instruction::new(Direction::Left, 1),
             Instruction::new(Direction::Right, 1)
         ];
-        let final_location = l.follow_all_instructions(instructions);
+        let final_location = l.follow_all_instructions(&instructions);
         let expected_location = Location {
             x: -1,
             y: 1,
@@ -245,7 +245,7 @@ mod test {
             Instruction::new(Direction::Right, 4),
             Instruction::new(Direction::Right, 8),
         ];
-        let hq_location = l.first_repeated_location(instructions);
+        let hq_location = l.first_repeated_location(&instructions);
         let expected_location = Location {
             x: 4,
             y: 0,

@@ -16,20 +16,20 @@ pub fn main() {
     f.read_to_string(&mut s).expect("Couldn't read file into string");
     match parse::instructions(s.as_bytes()) {
         IResult::Done(_, instructions) => {
-            part_1(instructions.clone());
-            part_2(instructions.clone());
+            part_1(&instructions);
+            part_2(&instructions);
         }
         IResult::Error(error) => panic!("Error: {:?}", error),
         IResult::Incomplete(needed) => panic!("Incomplete input: {:?}", needed),
     }
 }
 
-fn part_1(instructions: Vec<Instruction>) {
+fn part_1(instructions: &Vec<Instruction>) {
     let hq_location = navigation::Location::new().follow_all_instructions(instructions);
     println!("Final location is {:?}", hq_location)
 }
 
-fn part_2(instructions: Vec<Instruction>) {
+fn part_2(instructions: &Vec<Instruction>) {
     let hq_location = navigation::Location::new().first_repeated_location(instructions);
     println!("Final location is {:?}", hq_location)
 }
