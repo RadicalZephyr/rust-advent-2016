@@ -35,17 +35,17 @@ impl Keypad {
         }
     }
 
-    pub fn next_key(&mut self, directions: Vec<Direction>) {
+    pub fn next_key(&mut self, directions: &Vec<Direction>) {
         for d in directions {
-            self.do_move(d);
+            self.do_move(&d);
         }
     }
 
-    pub fn do_move(&mut self, direction: Direction) {
+    pub fn do_move(&mut self, direction: &Direction) {
         self.num = self.lookup_move(direction);
     }
 
-    pub fn lookup_move(&self, direction: Direction) -> u8 {
+    pub fn lookup_move(&self, direction: &Direction) -> u8 {
         *self.lookup
             .get(&self.num)
             .map(|direction_lookup| {
@@ -99,16 +99,16 @@ mod tests {
         use super::Direction::*;
         let moves = vec![Up, Left, Left];
         let mut kp = Keypad::new(simple_lookup());
-        kp.next_key(moves);
+        kp.next_key(&moves);
         assert_eq!(1, kp.num);
     }
 
     #[test]
     fn test_do_move() {
         let mut kp = Keypad::new(simple_lookup());
-        kp.do_move(Direction::Up);
+        kp.do_move(&Direction::Up);
         assert_eq!(2, kp.num);
-        kp.do_move(Direction::Down);
+        kp.do_move(&Direction::Down);
         assert_eq!(5, kp.num);
     }
 }
