@@ -5,7 +5,7 @@ pub mod parse;
 
 #[derive(Clone,Debug,Eq,Hash,PartialEq)]
 pub struct Room {
-    sector_id: u16,
+    pub sector_id: u16,
     checksum: String,
     name: String,
 }
