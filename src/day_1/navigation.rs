@@ -95,16 +95,8 @@ impl Location {
         }
     }
 
-    pub fn turn_for(&self, instruction: &Instruction) -> Self {
-        Location {
-            x: self.x,
-            y: self.y,
-            heading: self.heading.turn(instruction.direction),
-        }
-    }
-
-    pub fn walk_for(&self, instruction: &Instruction) -> Self {
-        let (dx, dy) = travel(self.heading, instruction.distance);
+    fn with_offset(&self, offset: (i64, i64)) -> Self {
+        let (dx, dy) = offset;
         Location {
             x: self.x + dx,
             y: self.y + dy,
@@ -112,17 +104,21 @@ impl Location {
         }
     }
 
+    pub fn turn_for(&self, instruction: &Instruction) -> Self {
+        Location { heading: self.heading.turn(instruction.direction), ..*self }
+    }
+
+    pub fn walk_for(&self, instruction: &Instruction) -> Self {
+        self.with_offset(travel(self.heading, instruction.distance))
+    }
+
     pub fn locations_walked_through_for(&self, instruction: &Instruction) -> Vec<Self> {
         // println!("");
         travel_iter(self.heading, instruction.distance)
             .into_iter()
-            .map(|(dx, dy)| {
+            .map(|offset| {
                 // println!("({},{})", dx, dy);
-                Location {
-                    x: self.x + dx,
-                    y: self.y + dy,
-                    heading: self.heading,
-                }
+                self.with_offset(offset)
             })
             .collect()
     }
