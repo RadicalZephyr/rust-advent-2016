@@ -22,8 +22,33 @@ named!(pub triangle<Triangle>,
        )
 );
 
-named!(pub triangles_list<Vec<Triangle> >,
+named!(pub by_row_triangles<Vec<Triangle> >,
        many1!(triangle)
+);
+
+named!(pub three_triangle_block<Vec<Triangle> >,
+       map!(
+           tuple!(
+               tuple!(side, side, side),
+               tuple!(side, side, side),
+               tuple!(side, side, side)
+           ),
+           Triangle::from_block
+       )
+);
+
+fn concat(blocks: Vec<Vec<Triangle>>) -> Vec<Triangle> {
+    blocks.into_iter().fold(vec![], |mut acc, mut next| {
+        acc.append(&mut next);
+        acc
+    })
+}
+
+named!(pub by_col_triangles<Vec<Triangle> >,
+       map!(
+           many1!(three_triangle_block),
+           concat
+       )
 );
 
 #[cfg(test)]
@@ -49,10 +74,21 @@ mod tests {
 
     #[test]
     fn test_triangles_list() {
-        assert_eq!(triangles_list(b"1 1 1\n3 3 3"),
+        assert_eq!(by_row_triangles(b"1 1 1\n3 3 3"),
                    IResult::Done(&b""[..],
                                  vec![
                                      Triangle::new((1,1,1)),
+                                     Triangle::new((3,3,3))
+                                 ]));
+    }
+
+    #[test]
+    fn test_by_col_triangles() {
+        assert_eq!(by_col_triangles(b"1 2 3\n1 2 3\n1 2 3"),
+                   IResult::Done(&b""[..],
+                                 vec![
+                                     Triangle::new((1,1,1)),
+                                     Triangle::new((2,2,2)),
                                      Triangle::new((3,3,3))
                                  ]));
     }
