@@ -5,15 +5,13 @@ use nom::{alpha, digit};
 
 use super::Room;
 
-named!(pub chkstring<&str>,
-       map_res!(
-           alpha,
-           str::from_utf8
-       )
-);
-
 named!(pub checksum<&str>,
-       delimited!(tag!("["), call!(chkstring), tag!("]"))
+       delimited!(tag!("["),
+                  map_res!(
+                      alpha,
+                      str::from_utf8
+                  ),
+                  tag!("]"))
 );
 
 named!(pub sector_id<u16>,
@@ -41,18 +39,23 @@ named!(pub name<Vec<&str> >,
 
 named!(pub room<Room>,
        map!(
-           tuple!(name, sector_id, checksum),
+           chain!(name: name ~
+                  tag!("-") ~
+                  sector_id: sector_id ~
+                  checksum: checksum,
+                  || (sector_id, checksum, name)),
            Room::from_tuple
        )
 );
 
 named!(pub rooms<Vec<Room> >,
-       many1!(room)
+       many1!(ws!(room))
 );
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::Room;
 
     use nom::IResult;
 
@@ -63,11 +66,30 @@ mod tests {
 
     #[test]
     fn test_name() {
-        assert_eq!(name(b"ab-cd"),
-                   IResult::Done(&b""[..],
-                                 vec![
-                                     "ab",
-                                     "cd"
-                                 ]));
+        assert_eq!(name(b"ab-cd"), IResult::Done(&b""[..], vec!["ab", "cd"]));
+        assert_eq!(name(b"cd-de-ab"), IResult::Done(&b""[..], vec!["cd", "de", "ab"]));
+    }
+
+    #[test]
+    fn test_checksum() {
+        assert_eq!(checksum(b"[checksum]"), IResult::Done(&b""[..], "checksum"));
+        assert_eq!(checksum(b"[thing]"), IResult::Done(&b""[..], "thing"));
+    }
+
+    #[test]
+    fn test_room() {
+        assert_eq!(room(b"ab-123[chk]"),
+                   IResult::Done(&b""[..], Room::from_tuple((123, "chk", vec!["ab"]))));
+        assert_eq!(room(b"ab-cd-543[def]"),
+                   IResult::Done(&b""[..], Room::from_tuple((543, "def", vec!["ab", "cd"]))));
+    }
+
+    #[test]
+    fn test_rooms() {
+        assert_eq!(rooms(b"ab-123[chk]\nab-cd-543[def]"),
+                   IResult::Done(&b""[..], vec![
+                       Room::from_tuple((123, "chk", vec!["ab"])),
+                       Room::from_tuple((543, "def", vec!["ab", "cd"]))
+                   ]));
     }
 }
