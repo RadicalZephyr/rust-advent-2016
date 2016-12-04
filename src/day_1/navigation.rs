@@ -162,16 +162,11 @@ impl TrackingLocationReduction {
         let mut hq_location = self.hq_location;
         for location in correct_heading.locations_walked_through_for(&instruction) {
             // println!("({},{})", location.x, location.y);
-            hq_location = match hq_location {
-                hq @ Some(_) => hq,
-                None => {
-                    if self.visited.contains(&location) {
-                        Some(location)
-                    } else {
-                        None
-                    }
-                }
-            };
+            hq_location = hq_location.or(if self.visited.contains(&location) {
+                Some(location)
+            } else {
+                None
+            });
             self.visited.insert(location);
         }
         // print!("#{}", "{");
