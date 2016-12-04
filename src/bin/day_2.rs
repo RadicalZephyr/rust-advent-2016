@@ -15,7 +15,10 @@ pub fn main() {
     let mut s = String::new();
     f.read_to_string(&mut s).expect("Couldn't read file into string");
     match parse::instructions_list(s.as_bytes()) {
-        IResult::Done(_, instructions_list) => part_1(instructions_list),
+        IResult::Done(_, instructions_list) => {
+            part_1(instructions_list.clone());
+            part_2(instructions_list.clone())
+        }
         IResult::Error(error) => panic!("Error: {:?}", error),
         IResult::Incomplete(needed) => panic!("Incomplete input: {:?}", needed),
     }
@@ -26,6 +29,15 @@ fn part_1(instructions_list: Vec<Vec<Direction>>) {
     for instructions in instructions_list {
         kp.next_key(instructions);
         print!("{}", kp.num);
+    }
+    println!("");
+}
+
+fn part_2(instructions_list: Vec<Vec<Direction>>) {
+    let mut kp = Keypad::new(day_2::crazy_lookup());
+    for instructions in instructions_list {
+        kp.next_key(instructions);
+        print!("{} ", kp.num);
     }
     println!("");
 }

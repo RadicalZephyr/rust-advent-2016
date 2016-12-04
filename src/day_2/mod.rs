@@ -71,6 +71,25 @@ pub fn simple_lookup() -> HashMap<u8, HashMap<Direction, u8>> {
     )
 }
 
+pub fn crazy_lookup() -> HashMap<u8, HashMap<Direction, u8>> {
+    use self::Direction::*;
+    map!(
+        1 => map!(Down => 3),
+        2 => map!(Right => 3, Down => 6),
+        3 => map!(Left => 2, Right => 4, Up => 1, Down => 7),
+        4 => map!(Left => 3, Down => 8),
+        5 => map!(Right => 6),
+        6 => map!(Left => 5, Right => 7, Up => 2, Down => 10),
+        7 => map!(Left => 6, Right => 8, Up => 3, Down => 11),
+        8 => map!(Left => 7, Right => 9, Up => 4, Down => 12),
+        9 => map!(Left => 8),
+        10 => map!(Right => 11, Up => 6),
+        11 => map!(Left => 10, Right => 12, Up => 7, Down => 13),
+        12 => map!(Left => 11, Up => 8),
+        13 => map!(Up => 11)
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
