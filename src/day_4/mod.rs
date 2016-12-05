@@ -3,6 +3,22 @@ use std::cmp::Ordering;
 
 pub mod parse;
 
+struct Cipher {
+    offset: u8,
+}
+
+impl Cipher {
+    pub fn new(offset: u16) -> Self {
+        Cipher { offset: (offset % 26) as u8 }
+    }
+
+    pub fn rotate(&self, c: char) -> char {
+        let x = c as u8 - 'a' as u8;
+        let x1 = (x + self.offset) % 26;
+        (x1 + 'a' as u8) as char
+    }
+}
+
 #[derive(Clone,Debug,Eq,Hash,PartialEq)]
 pub struct Room {
     pub sector_id: u16,
@@ -21,6 +37,11 @@ impl Room {
                 acc
             }),
         }
+    }
+
+    pub fn decipher_name(&self) -> String {
+        let cipher = Cipher::new(self.sector_id);
+        self.name.chars().map(|c| cipher.rotate(c)).collect()
     }
 
     pub fn generate_checksum(&self) -> String {
@@ -54,6 +75,13 @@ impl Room {
 #[cfg(test)]
 mod tests {
     use super::Room;
+    #[test]
+    fn test_decipher_name() {
+        let r = Room::from_tuple((1, "abxyz", vec!["aaaaa", "bbb", "z", "y", "x"]));
+        assert_eq!(r.decipher_name(), "bbbbbcccazy");
+        let r = Room::from_tuple((26, "abcde", vec!["a", "b", "c", "d", "e", "f", "g", "h"]));
+        assert_eq!(r.decipher_name(), "abcdefgh");
+    }
 
     #[test]
     fn test_generate_checksum() {

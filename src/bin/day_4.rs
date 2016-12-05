@@ -29,4 +29,9 @@ fn part_1(rooms: &Vec<Room>) {
     println!("Total of real sector ids: {}", sum_of_ids);
 }
 
-fn part_2(_rooms: &Vec<Room>) {}
+fn part_2(_rooms: &Vec<Room>) {
+    let x = 26;
+    let a = x % 26;
+    println!("{} % 26 = {}", x, a);
+    println!("{}", 'z' as u8 - 'a' as u8);
+}
