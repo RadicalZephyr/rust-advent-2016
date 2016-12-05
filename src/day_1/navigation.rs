@@ -106,14 +106,16 @@ impl Location {
         travel_iter(self.heading, instruction.distance)
             .into_iter()
             .map(|offset| {
-                // println!("({},{})", dx, dy);
+                // println!("({},{})", offset.0, offset.1);
                 self.with_offset(offset)
             })
             .collect()
     }
 
     pub fn follow_instruction(self, i: &Instruction) -> Self {
-        self.turn_for(&i).walk_for(&i)
+        let at = self.turn_for(&i).walk_for(&i);
+        println!("({},{})", at.x, at.y);
+        at
     }
 
     pub fn follow_all_instructions(self, instructions: &Vec<Instruction>) -> Self {

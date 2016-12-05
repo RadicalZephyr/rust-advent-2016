@@ -5,3 +5,4 @@ authors = ["Geoff Shannon <geoffpshannon@gmail.com>"]
 
 [dependencies]
 nom = "^2.0"
+rust-crypto = "0.2.36"
