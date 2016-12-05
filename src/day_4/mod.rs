@@ -34,6 +34,7 @@ impl Room {
             checksum: checksum.to_owned(),
             name: name_parts.into_iter().fold(String::new(), |mut acc, n| {
                 acc.push_str(n);
+                acc.push(' ');
                 acc
             }),
         }
@@ -41,14 +42,19 @@ impl Room {
 
     pub fn decipher_name(&self) -> String {
         let cipher = Cipher::new(self.sector_id);
-        self.name.chars().map(|c| cipher.rotate(c)).collect()
+        self.name
+            .chars()
+            .map(|c| { if ' ' != c { cipher.rotate(c) } else { c } })
+            .collect()
     }
 
     pub fn generate_checksum(&self) -> String {
         let frequencies = self.name
             .chars()
             .fold(HashMap::new(), |mut acc, c| {
-                *acc.entry(c).or_insert(0) += 1;
+                if ' ' != c {
+                    *acc.entry(c).or_insert(0) += 1;
+                }
                 acc
             });
         let mut freq_kv: Vec<(&char, &usize)> = frequencies.iter().collect();
@@ -78,9 +84,9 @@ mod tests {
     #[test]
     fn test_decipher_name() {
         let r = Room::from_tuple((1, "abxyz", vec!["aaaaa", "bbb", "z", "y", "x"]));
-        assert_eq!(r.decipher_name(), "bbbbbcccazy");
+        assert_eq!(r.decipher_name(), "bbbbb ccc a z y ");
         let r = Room::from_tuple((26, "abcde", vec!["a", "b", "c", "d", "e", "f", "g", "h"]));
-        assert_eq!(r.decipher_name(), "abcdefgh");
+        assert_eq!(r.decipher_name(), "a b c d e f g h ");
     }
 
     #[test]
