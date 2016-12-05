@@ -32,7 +32,7 @@ fn part_1(rooms: &Vec<Room>) {
 fn part_2(rooms: &Vec<Room>) {
     for room in rooms {
         if room.is_real() {
-            println!("{}", room.decipher_name());
+            println!("{} {}", room.sector_id, room.decipher_name());
         }
     }
 }
